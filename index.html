@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#183846" />
+  <meta name="description" content="Ceylonova Global Tours booking voucher generator" />
+  <title>Ceylonova Booking Voucher Generator</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="assets/logo.png" alt="Ceylonova Global Tours logo" class="brand-logo" />
+      <div>
+        <div class="brand-name">CEYLONOVA GLOBAL TOURS</div>
+        <div class="brand-subtitle">Booking Voucher Generator</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro-card">
+      <div>
+        <span class="eyebrow">Fast voucher creation</span>
+        <h1>Create a hotel booking voucher</h1>
+        <p>Enter only the booking details. Reference number, issue date, check-out date, nights and room total are handled automatically.</p>
+      </div>
+      <div class="auto-meta" aria-label="Automatically generated values">
+        <div>
+          <span>Reference</span>
+          <strong id="referenceDisplay">-</strong>
+        </div>
+        <div>
+          <span>Issue date</span>
+          <strong id="issueDateDisplay">-</strong>
+        </div>
+      </div>
+    </section>
+
+    <form id="voucherForm" class="voucher-form" novalidate>
+      <section class="form-card">
+        <div class="section-heading">
+          <div>
+            <span class="step">01</span>
+            <h2>Guest & hotel</h2>
+          </div>
+        </div>
+
+        <div class="form-grid two-col">
+          <label class="field">
+            <span>Client name <b>*</b></span>
+            <input id="clientName" name="clientName" type="text" autocomplete="organization" placeholder="e.g. Random Travels" required />
+          </label>
+
+          <label class="field">
+            <span>Country <b>*</b></span>
+            <input id="country" name="country" type="text" autocomplete="country-name" placeholder="e.g. Slovakia" required />
+          </label>
+
+          <label class="field full-width">
+            <span>Hotel <b>*</b></span>
+            <input id="hotel" name="hotel" type="text" autocomplete="off" placeholder="e.g. Hotel Oakray Heritage" required />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading">
+          <div>
+            <span class="step">02</span>
+            <h2>Stay details</h2>
+          </div>
+        </div>
+
+        <div class="form-grid two-col">
+          <label class="field">
+            <span>Check in <b>*</b></span>
+            <input id="checkIn" name="checkIn" type="date" required />
+          </label>
+
+          <label class="field">
+            <span>Duration <b>*</b></span>
+            <select id="duration" name="duration" required></select>
+          </label>
+
+          <label class="field">
+            <span>Check out</span>
+            <input id="checkOut" name="checkOut" type="text" readonly aria-readonly="true" placeholder="Calculated automatically" />
+            <small>Calculated from check-in + duration.</small>
+          </label>
+
+          <label class="field">
+            <span>Meal basis <b>*</b></span>
+            <select id="mealBasis" name="mealBasis" required>
+              <option value="Half board (H/B)" data-sentence="half-board">Half board (H/B)</option>
+              <option value="Full board (F/B)" data-sentence="full-board">Full board (F/B)</option>
+              <option value="Bed & breakfast (B/B)" data-sentence="bed-and-breakfast">Bed & breakfast (B/B)</option>
+              <option value="Room only" data-sentence="room-only">Room only</option>
+              <option value="All inclusive (A/I)" data-sentence="all-inclusive">All inclusive (A/I)</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading rooms-heading">
+          <div>
+            <span class="step">03</span>
+            <h2>Rooms</h2>
+          </div>
+          <button id="addRoomBtn" class="secondary-button" type="button">+ Add room type</button>
+        </div>
+
+        <div id="roomRows" class="room-rows"></div>
+        <datalist id="roomTypeOptions">
+          <option value="Single room"></option>
+          <option value="Double room"></option>
+          <option value="Twin room"></option>
+          <option value="Triple room"></option>
+          <option value="Family room"></option>
+          <option value="Standard room"></option>
+          <option value="Superior room"></option>
+          <option value="Deluxe room"></option>
+          <option value="Suite"></option>
+        </datalist>
+
+        <div class="rooms-total">
+          <span>Total rooms requested</span>
+          <strong id="totalRooms">0</strong>
+        </div>
+      </section>
+
+      <section class="form-card compact-card">
+        <div class="section-heading">
+          <div>
+            <span class="step">04</span>
+            <h2>Requested by</h2>
+          </div>
+        </div>
+        <label class="field">
+          <span>Name <b>*</b></span>
+          <input id="requestedBy" name="requestedBy" type="text" value="Manoj Peiris" required />
+        </label>
+      </section>
+
+      <div id="formError" class="form-error" role="alert" hidden></div>
+
+      <div class="action-bar">
+        <button id="newVoucherBtn" class="secondary-button" type="button">New voucher</button>
+        <button id="downloadBtn" class="primary-button" type="submit">
+          <span>Generate & download PDF</span>
+          <span class="button-ref" id="downloadRef"></span>
+        </button>
+      </div>
+    </form>
+
+    <section class="note-card">
+      <strong>Automatic fields</strong>
+      <span>The PDF file name is the generated tour reference. Example: <code>SK261002-A7K2.pdf</code>.</span>
+    </section>
+  </main>
+
+  <template id="roomRowTemplate">
+    <div class="room-row">
+      <label class="field quantity-field">
+        <span>Quantity <b>*</b></span>
+        <input class="room-quantity" type="number" min="1" max="99" step="1" value="1" required inputmode="numeric" />
+      </label>
+      <label class="field room-type-field">
+        <span>Room type <b>*</b></span>
+        <input class="room-type" type="text" list="roomTypeOptions" placeholder="e.g. Double room" required />
+      </label>
+      <button class="remove-room-button" type="button" aria-label="Remove room type">Remove</button>
+    </div>
+  </template>
+
+  <img id="pdfLogo" src="assets/logo.png" alt="" hidden />
+  <script src="app.js" defer></script>
+</body>
+</html>
