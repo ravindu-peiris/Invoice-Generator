@@ -156,6 +156,16 @@
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
+  function formatDisplayDate(value) {
+    const date = value instanceof Date ? value : new Date(`${value}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(date);
+  }
+
   function durationLabel(nights) {
     return `${nights} ${nights === 1 ? 'night' : 'nights'}`;
   }
@@ -169,7 +179,7 @@
     }
     const date = new Date(`${checkInValue}T12:00:00`);
     date.setDate(date.getDate() + nights);
-    $('checkOut').value = formatLongDate(date);
+    $('checkOut').value = formatDisplayDate(date);
     return date;
   }
 
@@ -592,12 +602,21 @@
   addRoomRow({ quantity: 1, type: 'Double room' });
   setupMobileActionBar();
 
-  $('checkIn').addEventListener('change', () => { calculateCheckOut(); clearError(); });
-  $('duration').addEventListener('change', calculateCheckOut);
+  function handleStayDetailsChange(event) {
+    if (event.target !== $('checkIn') && event.target !== $('duration')) return;
+    calculateCheckOut();
+    if (event.target === $('checkIn')) clearError();
+  }
+
   $('country').addEventListener('input', refreshReference);
   $('addRoomBtn').addEventListener('click', () => addRoomRow());
   $('newVoucherBtn').addEventListener('click', resetVoucher);
-  form.addEventListener('input', clearError);
+  form.addEventListener('input', (event) => {
+    clearError();
+    handleStayDetailsChange(event);
+  });
+  form.addEventListener('change', handleStayDetailsChange);
+  calculateCheckOut();
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
