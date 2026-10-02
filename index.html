@@ -114,17 +114,6 @@
         </div>
 
         <div id="roomRows" class="room-rows"></div>
-        <datalist id="roomTypeOptions">
-          <option value="Single room"></option>
-          <option value="Double room"></option>
-          <option value="Twin room"></option>
-          <option value="Triple room"></option>
-          <option value="Family room"></option>
-          <option value="Standard room"></option>
-          <option value="Superior room"></option>
-          <option value="Deluxe room"></option>
-          <option value="Suite"></option>
-        </datalist>
 
         <div class="rooms-total">
           <span>Total rooms requested</span>
@@ -150,15 +139,14 @@
       <div class="action-bar">
         <button id="newVoucherBtn" class="secondary-button" type="button">New voucher</button>
         <button id="downloadBtn" class="primary-button" type="submit">
-          <span>Generate & download PDF</span>
-          <span class="button-ref" id="downloadRef"></span>
+          <span>Download PDF</span>
         </button>
       </div>
     </form>
 
     <section class="note-card">
       <strong>Automatic fields</strong>
-      <span>The PDF file name is the generated tour reference. Example: <code>SK261002-A7K2.pdf</code>.</span>
+      <span>The PDF file name is the generated tour reference. Example: <code>SK1002-A7K2.pdf</code> (country code + month/day + random suffix).</span>
     </section>
   </main>
 
@@ -170,7 +158,17 @@
       </label>
       <label class="field room-type-field">
         <span>Room type <b>*</b></span>
-        <input class="room-type" type="text" list="roomTypeOptions" placeholder="e.g. Double room" required />
+        <select class="room-type" required>
+          <option value="Single room">Single room</option>
+          <option value="Double room">Double room</option>
+          <option value="Twin room">Twin room</option>
+          <option value="Triple room">Triple room</option>
+          <option value="Family room">Family room</option>
+          <option value="Standard room">Standard room</option>
+          <option value="Superior room">Superior room</option>
+          <option value="Deluxe room">Deluxe room</option>
+          <option value="Suite">Suite</option>
+        </select>
       </label>
       <button class="remove-room-button" type="button" aria-label="Remove room type">Remove</button>
     </div>

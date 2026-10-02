@@ -22,15 +22,124 @@
     return String(value).padStart(2, '0');
   }
 
-  function generateReference() {
-    const now = new Date();
-    const datePart = `${String(now.getFullYear()).slice(-2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+  const countryCodes = {
+    slovakia: 'SK',
+    canada: 'CN',
+    'sri lanka': 'LK',
+    india: 'IN',
+    china: 'CN',
+    australia: 'AU',
+    germany: 'DE',
+    france: 'FR',
+    italy: 'IT',
+    spain: 'ES',
+    netherlands: 'NL',
+    belgium: 'BE',
+    switzerland: 'CH',
+    austria: 'AT',
+    poland: 'PL',
+    'czech republic': 'CZ',
+    czechia: 'CZ',
+    hungary: 'HU',
+    romania: 'RO',
+    bulgaria: 'BG',
+    greece: 'GR',
+    portugal: 'PT',
+    sweden: 'SE',
+    norway: 'NO',
+    denmark: 'DK',
+    finland: 'FI',
+    ireland: 'IE',
+    'united kingdom': 'GB',
+    uk: 'GB',
+    england: 'GB',
+    scotland: 'GB',
+    wales: 'GB',
+    'united states': 'US',
+    usa: 'US',
+    'united states of america': 'US',
+    japan: 'JP',
+    'south korea': 'KR',
+    korea: 'KR',
+    thailand: 'TH',
+    vietnam: 'VN',
+    indonesia: 'ID',
+    malaysia: 'MY',
+    singapore: 'SG',
+    philippines: 'PH',
+    'new zealand': 'NZ',
+    'south africa': 'ZA',
+    brazil: 'BR',
+    mexico: 'MX',
+    argentina: 'AR',
+    chile: 'CL',
+    colombia: 'CO',
+    peru: 'PE',
+    russia: 'RU',
+    ukraine: 'UA',
+    turkey: 'TR',
+    israel: 'IL',
+    'saudi arabia': 'SA',
+    'united arab emirates': 'AE',
+    uae: 'AE',
+    qatar: 'QA',
+    kuwait: 'KW',
+    bahrain: 'BH',
+    oman: 'OM',
+    egypt: 'EG',
+    morocco: 'MA',
+    kenya: 'KE',
+    nigeria: 'NG',
+    pakistan: 'PK',
+    bangladesh: 'BD',
+    nepal: 'NP',
+    maldives: 'MV',
+  };
+
+  function normalizeCountryName(countryName) {
+    return countryName.trim().toLowerCase().replace(/^the\s+/, '').replace(/\./g, '');
+  }
+
+  function getCountryCode(countryName) {
+    const normalized = normalizeCountryName(countryName);
+    if (!normalized) return 'XX';
+
+    if (countryCodes[normalized]) return countryCodes[normalized];
+
+    const words = normalized.split(/\s+/).filter(Boolean);
+    if (words.length >= 2) {
+      const first = words[0].replace(/[^a-z]/g, '');
+      const second = words[1].replace(/[^a-z]/g, '');
+      if (first && second) return `${first[0]}${second[0]}`.toUpperCase();
+    }
+
+    const letters = normalized.replace(/[^a-z]/g, '');
+    return (letters.slice(0, 2) || 'XX').toUpperCase().padEnd(2, 'X');
+  }
+
+  function generateReferenceSuffix() {
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const random = new Uint32Array(4);
     crypto.getRandomValues(random);
     let suffix = '';
     for (let i = 0; i < 4; i++) suffix += alphabet[random[i] % alphabet.length];
-    return `SK${datePart}-${suffix}`;
+    return suffix;
+  }
+
+  function buildReference(countryName, issueDate, suffix) {
+    const countryCode = getCountryCode(countryName);
+    const datePart = `${pad(issueDate.getMonth() + 1)}${pad(issueDate.getDate())}`;
+    return `${countryCode}${datePart}-${suffix}`;
+  }
+
+  function generateReference(countryName = $('country').value) {
+    return buildReference(countryName, state.issueDate || new Date(), generateReferenceSuffix());
+  }
+
+  function refreshReference() {
+    const suffix = state.reference.split('-')[1] || generateReferenceSuffix();
+    state.reference = buildReference($('country').value, state.issueDate, suffix);
+    updateReferenceUi();
   }
 
   function formatLongDate(value) {
@@ -81,14 +190,14 @@
     select.value = '1';
   }
 
-  function addRoomRow({ quantity = 1, type = '' } = {}) {
+  function addRoomRow({ quantity = 1, type = 'Double room' } = {}) {
     if (roomRows.children.length >= 6) return;
     const fragment = roomTemplate.content.cloneNode(true);
     const row = fragment.querySelector('.room-row');
     row.querySelector('.room-quantity').value = String(quantity);
     row.querySelector('.room-type').value = type;
     row.querySelector('.room-quantity').addEventListener('input', updateTotalRooms);
-    row.querySelector('.room-type').addEventListener('input', clearError);
+    row.querySelector('.room-type').addEventListener('change', clearError);
     row.querySelector('.remove-room-button').addEventListener('click', () => {
       row.remove();
       updateRoomRemoveButtons();
@@ -164,7 +273,7 @@
         return false;
       }
       if (!room.type) {
-        showError('Enter a room type for each row.');
+        showError('Select a room type for each row.');
         return false;
       }
     }
@@ -430,8 +539,8 @@
 
   function resetVoucher() {
     form.reset();
-    state.reference = generateReference();
     state.issueDate = new Date();
+    state.reference = generateReference();
     roomRows.innerHTML = '';
     $('requestedBy').value = 'Manoj Peiris';
     $('duration').value = '1';
@@ -450,6 +559,7 @@
 
   $('checkIn').addEventListener('change', () => { calculateCheckOut(); clearError(); });
   $('duration').addEventListener('change', calculateCheckOut);
+  $('country').addEventListener('input', refreshReference);
   $('addRoomBtn').addEventListener('click', () => addRoomRow());
   $('newVoucherBtn').addEventListener('click', resetVoucher);
   form.addEventListener('input', clearError);
