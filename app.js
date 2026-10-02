@@ -184,9 +184,13 @@
   }
 
   function updateReferenceUi() {
-    $('referenceDisplay').textContent = state.reference;
-    $('issueDateDisplay').textContent = formatLongDate(state.issueDate);
-    $('downloadRef').textContent = state.reference;
+    const referenceDisplay = $('referenceDisplay');
+    const issueDateDisplay = $('issueDateDisplay');
+    const downloadRef = $('downloadRef');
+
+    if (referenceDisplay) referenceDisplay.textContent = state.reference;
+    if (issueDateDisplay) issueDateDisplay.textContent = formatLongDate(state.issueDate);
+    if (downloadRef) downloadRef.textContent = state.reference;
   }
 
   function populateDurationOptions() {
