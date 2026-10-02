@@ -552,10 +552,45 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function setupMobileActionBar() {
+    const actionBar = document.querySelector('.action-bar');
+    const mobileQuery = window.matchMedia('(max-width: 760px)');
+    let focusTimer = 0;
+
+    const isFormField = (element) => (
+      element instanceof HTMLInputElement
+      && !['button', 'submit', 'reset', 'file'].includes(element.type)
+    ) || element instanceof HTMLSelectElement
+      || element instanceof HTMLTextAreaElement;
+
+    const syncActionBar = () => {
+      if (!actionBar || !mobileQuery.matches) {
+        actionBar?.classList.remove('is-hidden');
+        return;
+      }
+      const active = document.activeElement;
+      actionBar.classList.toggle('is-hidden', form.contains(active) && isFormField(active));
+    };
+
+    form.addEventListener('focusin', (event) => {
+      if (mobileQuery.matches && isFormField(event.target)) {
+        actionBar?.classList.add('is-hidden');
+      }
+    });
+
+    form.addEventListener('focusout', () => {
+      window.clearTimeout(focusTimer);
+      focusTimer = window.setTimeout(syncActionBar, 100);
+    });
+
+    mobileQuery.addEventListener('change', syncActionBar);
+  }
+
   populateDurationOptions();
   state.reference = generateReference();
   updateReferenceUi();
   addRoomRow({ quantity: 1, type: 'Double room' });
+  setupMobileActionBar();
 
   $('checkIn').addEventListener('change', () => { calculateCheckOut(); clearError(); });
   $('duration').addEventListener('change', calculateCheckOut);

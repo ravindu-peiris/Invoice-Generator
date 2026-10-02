@@ -283,6 +283,13 @@ input[readonly] { background: #f4f7f8; color: #42545d; }
     border-top: 1px solid var(--line);
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     backdrop-filter: blur(12px);
+    transition: transform .2s ease, opacity .2s ease;
+  }
+
+  .action-bar.is-hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
   }
   .action-bar .secondary-button { flex: 0 0 auto; }
   .action-bar .primary-button { flex: 1 1 auto; padding-inline: 12px; }
